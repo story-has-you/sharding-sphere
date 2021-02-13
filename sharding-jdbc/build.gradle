@@ -1,0 +1,6 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'mysql:mysql-connector-java'
+    implementation "${lib.'sharding-jdbc'}"
+    implementation "${lib.'mybatis-plus'}"
+}

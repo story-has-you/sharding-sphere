@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: sharding-jdbc
+  shardingsphere:
+    datasource:
+      names: ds0,ds1
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_jdbc1
+        username: root
+        password: 123456
+      ds1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_jdbc2
+        username: root
+        password: 123456
+    props: {sql.show: true}
+    sharding:
+      tables:
+        position:
+          database-strategy:
+            inline:
+              sharding-column: id # 分片字段
+              algorithm-expression: ds${id % 2} # 分片规则
+          # 自定义主键生成
+          key-generator:
+            column: id
+            type: order_id
+
+        position_detail:
+          database-strategy:
+            inline:
+              sharding-column: pid # 分片字段
+              algorithm-expression: ds${pid % 2} # 分片规则
+          # 自定义主键生成
+          key-generator:
+            column: id
+            type: SNOWFLAKE
+
+        city:
+          # 自定义主键生成
+          key-generator:
+            column: id
+            type: SNOWFLAKE
+        # b_order 的分库分表设置
+        b_order:
+          actual-data-nodes: ds${0..1}.b_order${0..1}
+          database-strategy:
+            inline:
+              sharding-column: company_id # 分片字段
+              algorithm-expression: ds${company_id % 2} # 分片规则
+          table-strategy:
+            inline:
+              sharding-column: id
+              algorithm-expression: b_order${id % 2}
+          # 自定义主键生成
+          key-generator:
+            column: id
+            type: SNOWFLAKE
+      # 广播表，两个库中都会插入数据
+      broadcast-tables: city
+
+
+mybatis-plus:
+  global-config:
+    banner: false

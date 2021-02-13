@@ -1,0 +1,97 @@
+buildscript {
+    repositories {
+        maven { url "https://maven.aliyun.com/nexus/content/groups/public" }
+        maven { url "https://maven.aliyun.com/nexus/content/repositories/gradle-plugin" }
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    /*定义依赖的springboot版本*/
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:${springIOVersion}"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+group 'com.storyhasyou'
+version '1.0.0-SNAPSHOT'
+
+ext {
+
+    libraries = [
+            kratosVersion = '2.4.3.RELEASE',
+            shardingJdbcVersion = '4.1.0',
+            mybatisPlusVersion = '3.4.1',
+    ]
+
+    lib = [
+            'mybatis-plus'     : "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}",
+            'blades-of-chaos'  : "com.storyhasyou.kratos:blades-of-chaos:${kratosVersion}",
+            'sharding-jdbc': "org.apache.shardingsphere:sharding-jdbc-spring-boot-starter:${shardingJdbcVersion}"
+    ]
+}
+
+subprojects {
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+
+    repositories {
+        mavenLocal()
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven {
+            credentials {
+                username 'izsDIz'
+                password 'd0m3vboJtv'
+            }
+            url 'https://repo.rdc.aliyun.com/repository/80472-release-g0GNmg/'
+        }
+        maven {
+            credentials {
+                username 'izsDIz'
+                password 'd0m3vboJtv'
+            }
+            url 'https://repo.rdc.aliyun.com/repository/80472-snapshot-JrqSLt/'
+        }
+    }
+
+    // 所有的项目共用依赖
+    dependencies {
+        implementation "${lib.'blades-of-chaos'}"
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        }
+        // 这里一定得要。在多模块下，不然编译失败，因为不会把信赖模块给打包。
+        jar {
+            enabled = true
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    compileJava {
+        options.compilerArgs << '-parameters'
+        options.encoding = 'UTF-8'
+        // 增量编译
+        options.incremental = true
+    }
+}
