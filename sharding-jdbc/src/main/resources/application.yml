@@ -60,7 +60,14 @@ spring:
             column: id
             type: SNOWFLAKE
       # 广播表，两个库中都会插入数据
-      broadcast-tables: city
+      # broadcast-tables: city
+    # 读写分离
+    masterslave:
+      name: datasource
+      master-data-source-name: ds0
+      load-balance-algorithm-type: ROUND_ROBIN
+      slave-data-source-names:
+        - ds1
 
 
 mybatis-plus:
